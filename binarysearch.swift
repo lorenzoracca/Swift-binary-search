@@ -1,3 +1,28 @@
+extension CollectionType where Generator.Element : Comparable {
+    
+    ///Returns the index of the first element in the collection which does not compare less than `value`.
+    @warn_unused_result
+    func lowerBound(value: Self.Generator.Element) -> Index {
+        var len = self.startIndex.distanceTo(self.endIndex)
+        var firstIndex = self.startIndex
+        while len > 0 {
+            let half = len/2
+            let middle = firstIndex.advancedBy(half)
+            
+            if value > self[middle] {
+                firstIndex = middle.advancedBy(1)
+                len -= half.successor()
+            } else {
+                len = half
+            }
+        }
+        return firstIndex
+    }
+}
+
+
+
+
 extension CollectionType {
     
     /// Returns an index such that each element at or above the index is
