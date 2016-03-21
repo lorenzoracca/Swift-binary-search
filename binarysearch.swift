@@ -18,6 +18,26 @@ extension CollectionType where Generator.Element : Comparable {
         }
         return firstIndex
     }
+    
+    ///Returns the index of the first element in the collection which compares greater than `value`.
+    @warn_unused_result
+    func upperBound(value: Self.Generator.Element) -> Index {
+        
+        var len = self.startIndex.distanceTo(self.endIndex)
+        var firstIndex = self.startIndex
+        while len > 0 {
+            let half = len/2
+            let middle = firstIndex.advancedBy(half)
+            
+            if value < self[middle] {
+                len = half
+            } else {
+                firstIndex = middle.advancedBy(1)
+                len -= half.successor()
+            }
+        }
+        return firstIndex
+    }
 }
 
 
