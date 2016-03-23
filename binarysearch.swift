@@ -37,6 +37,19 @@ extension CollectionType where Generator.Element : Comparable {
         }
         return firstIndex
     }
+
+    /// Returns `true` if the collection contains `value` and
+    /// `false` otherwise.
+    ///
+    /// - Complexity: O(lg(n))
+    ///
+    /// - Returns: `true` if the collection contains `value`
+    ///            and `false` otherwise.
+    @warn_unused_result
+    func binarySearch(value: Self.Generater.Element) -> Index {
+        let lowerBound = lowerBound(value)
+        return (lowerBound != self.endIndex) && !(value < lowerBound)
+    }
 }
 
 
