@@ -59,6 +59,39 @@ extension CollectionType where Generator.Element : Comparable {
 }
 
 
+extension CollectionType where
+    Generator.Element: Comparable,
+    SubSequence: CollectionType,
+    SubSequence.Generator.Element == Generator.Element,
+    SubSequence.Index == Index
+{
+    /// Returns the range of indices corresponding to elements equivalent to
+    /// `value`. If `value` does not exist in the collection, the returned range
+    /// is empty, with `startIndex` equal to `lowerBound(value)`.
+    ///
+    /// - Requires: The elements must be sorted in ascending order.
+    public func equalRange(value: Generator.Element) -> Range<Index> {
+        var len = count
+        var (firstIndex, lastIndex) = (startIndex, endIndex)
+        
+        while len > 0 {
+            let half = len / 2
+            let middle = firstIndex.advancedBy(half)
+            if self[middle] < value {
+                firstIndex = middle.successor()
+                len -= half + 1
+            } else if value < self[middle] {
+                lastIndex = middle
+                len = half
+            } else {
+                return self[firstIndex..<middle].lowerBound(value) ..<
+                    self[middle.successor()..<lastIndex].upperBound(value)
+            }
+        }
+        
+        return firstIndex..<firstIndex
+    }
+}
 
 
 extension CollectionType {
@@ -140,5 +173,45 @@ extension CollectionType {
         } else {
             return nil
         }
+    }
+}
+
+
+extension CollectionType where
+    SubSequence: CollectionType,
+    SubSequence.Generator.Element == Generator.Element,
+    SubSequence.Index == Index
+{
+    /// Returns the range of indices corresponding to elements equivalent to
+    /// `value`. If `value` does not exist in the collection, the returned range
+    /// is empty, with `startIndex` equal to `lowerBound(value)`.
+    ///
+    /// - Requires: The elements must be sorted in ascending order.
+    public func equalRange(value: Generator.Element,
+        @noescape isOrderedBefore: (Self.Generator.Element,
+                                    Self.Generator.Element) -> Bool
+        ) -> Range<Index> {
+        
+        var len = count
+        var (firstIndex, lastIndex) = (startIndex, endIndex)
+        
+        while len > 0 {
+            let half = len / 2
+            let middle = firstIndex.advancedBy(half)
+            if isOrderedBefore(self[middle], value) {
+                firstIndex = middle.successor()
+                len -= half + 1
+            } else if isOrderedBefore(value, self[middle]) {
+                lastIndex = middle
+                len = half
+            } else {
+                return self[firstIndex..<middle].lowerBound(
+                    value, isOrderedBefore: isOrderedBefore) ..<
+                    self[middle.successor()..<lastIndex].upperBound(
+                        value, isOrderedBefore: isOrderedBefore)
+            }
+        }
+        
+        return firstIndex..<firstIndex
     }
 }
